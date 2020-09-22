@@ -42,8 +42,8 @@ namespace DposTask
         public string hash { get; set; }
         public string reward_address { get; set; }
         public decimal reward_money { get; set; }
-        public int height { get; set; }
-        public int time { get; set; }
+        public uint height { get; set; }
+        public uint time { get; set; }
         public string type { get; set; }
     }
 
@@ -101,7 +101,7 @@ namespace DposTask
         /// <summary>
         /// 最后的utc时间
         /// </summary>
-        private long m_last_utc;
+        private uint m_last_utc;
         public DposTask()
         {
             m_vote_reward = new Dictionary<string, Dictionary<string, VoteReward>>();
@@ -131,12 +131,12 @@ namespace DposTask
             return new DateTime(date.Year,date.Month,date.Day);
         }
 
-        long GetTimestamp(DateTime dateTime)
+        uint GetTimestamp(DateTime dateTime)
         {
             var now = DateTime.Now;
             var timezone = now - now.ToUniversalTime();
             DateTime dt = new DateTime(1970, 1, 1, timezone.Hours, 0, 0, 0);
-            return (long)(dateTime - dt).TotalSeconds;
+            return (uint)(dateTime - dt).TotalSeconds;
         }
 
         List<DposState> GetDposState(DateTime audit_date)
@@ -171,7 +171,7 @@ namespace DposTask
             }
         }
 
-        public int GetLastHeight()
+        public uint GetLastHeight()
         {
             using (var conn = new MySqlConnection(connStr))
             {
@@ -193,6 +193,7 @@ namespace DposTask
         /// </summary>
         public int Init()
         {
+            /*
             List<DposState> state = GetDposStateLast();
             if (state.Count == 1)
             {
@@ -202,7 +203,7 @@ namespace DposTask
                 {
                     conn.Execute(sql, new { audit_date = state[0].audit_date });
                 }
-            }
+            }*/
             return Load();
         }
 
@@ -217,7 +218,7 @@ namespace DposTask
                 var dt = ToDateTime(last_utc);
                 dt = dt.AddDays(-10);
                 string sql = "delete from DposState where audit_date = @audit_date";
-                conn.Execute(sql, new { audit_date = dt });
+                //conn.Execute(sql, new { audit_date = dt });
                 sql = "delete from DposPayment where payment_date = @payment_date";
                 conn.Execute(sql, new { payment_date = dt });
             }
@@ -271,14 +272,18 @@ namespace DposTask
                     string info = string.Format("{0} - run:id:{1},height:{2},date:{3},type:{4}", 
                         DateTime.Now.ToShortTimeString(), block.id, block.height, ToDateTime(block.time).ToShortDateString(), block.type);
                     Console.WriteLine(info);
-                    int last_height = GetLastHeight();
+                    uint last_height = GetLastHeight();
                     while (last_height < block.height + 30)
                     {
                         Console.WriteLine(DateTime.Now.ToShortTimeString() + " - sleep 60s.");
-                        Thread.Sleep(60 * 1000);
+                        Thread.Sleep(6 * 1000);
                         last_height = GetLastHeight();
                     }
 
+                    if (IsSave(m_last_utc, block.time))
+                    {
+                        SavePaymnet(m_last_utc);
+                    }
                     decimal total = 0;
                     if (IsDposAddr(block.reward_address))
                     {
@@ -295,11 +300,6 @@ namespace DposTask
                             //Console.WriteLine(string.Format("区块奖励地址{0};区块奖励金额{1}；奖励客户地址{2}", block.reward_address, block.reward_money, client_addr));
                             m_vote_reward[block.reward_address][client_addr].reward += block.reward_money * m_vote_reward[block.reward_address][client_addr].vote / total;
                         }
-                    }
-
-                    if (IsSave(m_last_utc, block.time))
-                    {
-                        SavePaymnet(m_last_utc);
                     }
                     m_last_utc = block.time;
                     id = block.id;
@@ -387,20 +387,17 @@ namespace DposTask
                 {
                     foreach (var client_addr in m_vote_reward[dpos_addr].Keys)
                     {
-                        if (client_addr != dpos_addr) //过滤节点自己给自己的投票(节点本身的投票收益不做清算)
-                        {
-                            string sql;
-                            if (conn.Query<DposState>("SELECT * FROM `DposState` where dpos_addr = @dpos_addr and client_addr = @client_addr and audit_date = @audit_date",
+                        string sql;
+                        if (conn.Query<DposState>("SELECT * FROM `DposState` where dpos_addr = @dpos_addr and client_addr = @client_addr and audit_date = @audit_date",
                                 new { dpos_addr = dpos_addr, client_addr = client_addr, audit_date = audit_date }).ToList().Count == 0)
-                            {
-                                sql = "INSERT DposState(dpos_addr, client_addr, audit_date, audit_money)VALUES(@dpos_addr, @client_addr, @audit_date, @audit_money)";
-                            }
-                            else
-                            {
-                                sql = "Update DposState set audit_money=@audit_money where dpos_addr = @dpos_addr and client_addr = @client_addr and audit_date = @audit_date";
-                            }
-                            conn.Execute(sql, new { dpos_addr = dpos_addr, client_addr = client_addr, audit_date = audit_date, audit_money = m_vote_reward[dpos_addr][client_addr].vote });
+                        {
+                            sql = "INSERT DposState(dpos_addr, client_addr, audit_date, audit_money)VALUES(@dpos_addr, @client_addr, @audit_date, @audit_money)";
                         }
+                        else
+                        {
+                            sql = "Update DposState set audit_money=@audit_money where dpos_addr = @dpos_addr and client_addr = @client_addr and audit_date = @audit_date";
+                        }
+                        conn.Execute(sql, new { dpos_addr = dpos_addr, client_addr = client_addr, audit_date = audit_date, audit_money = m_vote_reward[dpos_addr][client_addr].vote });
                     }
                 }
             }

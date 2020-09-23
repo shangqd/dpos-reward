@@ -218,9 +218,9 @@ namespace DposTask
                 var dt = ToDateTime(last_utc);
                 dt = dt.AddDays(-10);
                 string sql = "delete from DposState where audit_date = @audit_date";
-                //conn.Execute(sql, new { audit_date = dt });
-                sql = "delete from DposPayment where payment_date = @payment_date";
-                conn.Execute(sql, new { payment_date = dt });
+                conn.Execute(sql, new { audit_date = dt });
+                //sql = "delete from DposPayment where payment_date = @payment_date";
+                //conn.Execute(sql, new { payment_date = dt });
             }
         }
 

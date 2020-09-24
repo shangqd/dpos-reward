@@ -251,7 +251,11 @@ namespace DposTask
             dic.Add("20m04mdaq57pvvtg2f0y7q2gb8f973h231gv3mhn3nrfzgtk5pkd1m2c7", "18f2dv1vc6nv2xj7ak0e0yye4tx77205f5j73ep2a7a5w6szhjexkd5mj");
             dic.Add("20m0emvkr82b7qn8hq2fc8tt2135tph52ghnkqs8ggm06qfn42d6zxheq", "17k4bv0dw8q4p0hx69hx9pgg5bwxqdandwegh8rry4zrcezjpyv1zrvff");
             dic.Add("20m03w2c5xhphzfq7fqzh8qfgpdgsn86dzzdrhxb613ar2frg5y71t2yx", "1t877w7b61wsx1rabkd69dbn2kgybpj4ayw2eycezg8qkyfekn97hrmgy");
-            StreamWriter sw = new StreamWriter("./Dpos.log");
+
+            string file = string.Format("./dpos_{0}.log", dt.ToString("D"));
+            File.Delete(file);
+            StreamWriter sw = new StreamWriter(file);
+
             using (var conn = new MySqlConnection(connStr))
             {
                 string sql = "SELECT MAX(`hash`) as h1, MIN(`hash`) as h2 from Block where time >= UNIX_TIMESTAMP(@begin) and time<UNIX_TIMESTAMP(@end) and is_useful = 1";
@@ -276,14 +280,14 @@ namespace DposTask
                         {
                             info = "warning-->>" + info;
                             sw.WriteLine(info);
-                            Console.WriteLine(info);
+                            //Console.WriteLine(info);
                         }
                     }
                     else
                     {
                         info = "OK-->>" + info;
                         sw.WriteLine(info);
-                        Console.WriteLine(info);
+                        //Console.WriteLine(info);
                     }
                 }
             }

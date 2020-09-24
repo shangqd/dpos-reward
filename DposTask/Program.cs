@@ -64,7 +64,7 @@ namespace DposTask
         static void Dpos()
         {
             Inspect obj = new Inspect();
-            DateTime dt = new DateTime(2020, 9, 20);
+            DateTime dt = new DateTime(2020, 9, 22);
             obj.Dpos(dt);
         }
 
@@ -81,6 +81,8 @@ namespace DposTask
         }
         static void Main(string[] args)
         {
+            Dpos();
+            return;
             if (args.Length == 0)
             {
                 BBC_Sync();

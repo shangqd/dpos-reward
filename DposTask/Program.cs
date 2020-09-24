@@ -32,7 +32,44 @@ namespace DposTask
             System.Console.WriteLine(b);
         }
 
-        static void Main(string[] args)
+        /// <summary>
+        /// BBC 常规检查
+        /// </summary>
+        static void BBC_Check()
+        {
+            Inspect obj = new Inspect();
+            obj.BlockOut(3000);
+
+            DateTime dt = new DateTime(2020, 9, 14);
+            for (int i = 0; i < 10; i++)
+            {
+                string addr3 = "20g0epy7jerpbc542a15f99b00mzvex4g3rrkj04crdgzb30b7bp9ncfj";
+                string addr4 = "20g096rdj9xmmw284fr5vze52p8fstc71bjhzkrjmssbz9hnjkechjnqv";
+
+                Console.WriteLine(dt.AddDays(i).ToLongDateString());
+                obj.TxCheck(addr3, dt.AddDays(i));
+                obj.TxCheck(addr4, dt);
+            }
+        }
+
+        /// <summary>
+        ///  导出要发放的MKF地址和权重
+        /// </summary>
+        static void ExportJSON()
+        {
+            Inspect obj = new Inspect();
+            obj.MKF();
+        }
+
+        static void Dpos()
+        {
+            Inspect obj = new Inspect();
+            DateTime dt = new DateTime(2020, 9, 20);
+            obj.Dpos(dt);
+        }
+
+
+        static void BBC_Sync()
         {
             DposTask ds = new DposTask();
             int id = ds.Init();
@@ -41,6 +78,28 @@ namespace DposTask
                 id = 243800;
             }
             ds.Run(id);
+        }
+        static void Main(string[] args)
+        {
+            if (args.Length == 0)
+            {
+                BBC_Sync();
+            }
+            else
+            {
+                if (args[0] == "dpos")
+                {
+                    Dpos();
+                }
+                if (args[0] == "json")
+                {
+                    ExportJSON();
+                }
+                if (args[0] == "check")
+                {
+                    BBC_Check();
+                }
+            }
         }
     }
 }

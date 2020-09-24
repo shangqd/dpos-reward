@@ -81,8 +81,6 @@ namespace DposTask
         }
         static void Main(string[] args)
         {
-            Dpos();
-            return;
             if (args.Length == 0)
             {
                 BBC_Sync();

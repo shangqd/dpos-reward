@@ -1,25 +1,37 @@
 /*
 Navicat MySQL Data Transfer
 
-Source Server         : 台式机
+Source Server         : 虚拟机
 Source Server Version : 50731
-Source Host           : 192.168.0.113:3306
+Source Host           : 192.168.207.137:3306
 Source Database       : bigbang
 
 Target Server Type    : MYSQL
 Target Server Version : 50731
 File Encoding         : 65001
 
-Date: 2020-09-22 16:54:22
+Date: 2020-09-25 09:18:55
 */
 
 SET FOREIGN_KEY_CHECKS=0;
 
 -- ----------------------------
+-- Table structure for addr
+-- ----------------------------
+DROP TABLE IF EXISTS `addr`;
+CREATE TABLE `addr` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `addr` varchar(64) DEFAULT NULL,
+  `is_use` bit(1) DEFAULT NULL COMMENT '是否使用',
+  `master` varchar(20) DEFAULT NULL COMMENT '主人',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=5006 DEFAULT CHARSET=latin1;
+
+-- ----------------------------
 -- Table structure for Block
 -- ----------------------------
 DROP TABLE IF EXISTS `Block`;
-CREATE TABLE `block` (
+CREATE TABLE `Block` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `hash` varchar(64) DEFAULT NULL,
   `fork_hash` varchar(64) DEFAULT NULL,
@@ -35,56 +47,26 @@ CREATE TABLE `block` (
   PRIMARY KEY (`id`) USING BTREE,
   KEY `hash` (`hash`) USING BTREE,
   KEY `height` (`height`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=438852 DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT;
-
--- ----------------------------
--- Table structure for DposDailyReward
--- ----------------------------
-DROP TABLE IF EXISTS `DposDailyReward`;
-CREATE TABLE `dposdailyreward` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `dpos_addr` varchar(64) DEFAULT NULL COMMENT 'dpos节点地址',
-  `client_addr` varchar(64) DEFAULT NULL COMMENT '投票人地址',
-  `payment_date` date DEFAULT NULL COMMENT '收益日期',
-  `payment_money` decimal(20,10) DEFAULT NULL COMMENT '当日总收益',
-  `txid` varchar(64) DEFAULT NULL COMMENT '支付ID',
-  PRIMARY KEY (`id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=2228 DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT;
+) ENGINE=InnoDB AUTO_INCREMENT=282586 DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT;
 
 -- ----------------------------
 -- Table structure for DposPayment
 -- ----------------------------
 DROP TABLE IF EXISTS `DposPayment`;
-CREATE TABLE `dpospayment` (
+CREATE TABLE `DposPayment` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `dpos_addr` varchar(64) DEFAULT NULL COMMENT 'dpos 地址',
   `client_addr` varchar(64) DEFAULT NULL COMMENT '投票者收款地址',
   `payment_date` date DEFAULT NULL COMMENT '投票者收益的日期',
   `payment_money` decimal(20,10) DEFAULT NULL COMMENT '投票者在这个日期内的收益',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=42345 DEFAULT CHARSET=latin1 ROW_FORMAT=DYNAMIC;
-
--- ----------------------------
--- Table structure for DposRewardDetails
--- ----------------------------
-DROP TABLE IF EXISTS `DposRewardDetails`;
-CREATE TABLE `dposrewarddetails` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `dpos_addr` varchar(64) DEFAULT NULL COMMENT '节点地址',
-  `client_addr` varchar(64) DEFAULT NULL COMMENT '投票人(第三方投票和节点自投)',
-  `vote_amount` decimal(20,10) DEFAULT NULL COMMENT '投票金额',
-  `reward_money` decimal(20,10) DEFAULT NULL COMMENT '投票收益',
-  `reward_date` date DEFAULT NULL COMMENT '收益日期',
-  `block_height` int(11) DEFAULT NULL COMMENT '区块高度',
-  `reward_state` bit(1) DEFAULT b'0' COMMENT '汇总状态，1表示已计算汇总，0表未计算汇总',
-  PRIMARY KEY (`id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=686152 DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT;
+) ENGINE=InnoDB AUTO_INCREMENT=32305 DEFAULT CHARSET=latin1 ROW_FORMAT=DYNAMIC;
 
 -- ----------------------------
 -- Table structure for DposState
 -- ----------------------------
 DROP TABLE IF EXISTS `DposState`;
-CREATE TABLE `dposstate` (
+CREATE TABLE `DposState` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `dpos_addr` varchar(64) DEFAULT NULL COMMENT 'dpos 地址',
   `client_addr` varchar(64) DEFAULT NULL COMMENT '投票者地址',
@@ -92,51 +74,13 @@ CREATE TABLE `dposstate` (
   `audit_money` decimal(20,10) DEFAULT NULL COMMENT '清算金额',
   PRIMARY KEY (`id`) USING BTREE,
   KEY `dpos_addr` (`dpos_addr`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=48463 DEFAULT CHARSET=latin1 ROW_FORMAT=DYNAMIC;
-
--- ----------------------------
--- Table structure for Pool
--- ----------------------------
-DROP TABLE IF EXISTS `Pool`;
-CREATE TABLE `pool` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `address` varchar(64) NOT NULL COMMENT '地址',
-  `name` varchar(64) NOT NULL COMMENT '矿池/节点名称',
-  `type` varchar(10) DEFAULT NULL COMMENT '类型(pow或dpos)',
-  `key` varchar(128) DEFAULT NULL COMMENT '节点调用的APIKey',
-  `fee` decimal(20,10) DEFAULT NULL COMMENT '节点投票手续费率',
-  PRIMARY KEY (`id`,`address`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT;
-
--- ----------------------------
--- Table structure for PVInfo
--- ----------------------------
-DROP TABLE IF EXISTS `PVInfo`;
-CREATE TABLE `pvinfo` (
-  `pv_id` int(11) NOT NULL AUTO_INCREMENT,
-  `pv_ip` varchar(255) DEFAULT NULL,
-  `pv_date` datetime DEFAULT NULL,
-  `pv_page` varchar(255) DEFAULT NULL,
-  PRIMARY KEY (`pv_id`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT;
-
--- ----------------------------
--- Table structure for Task
--- ----------------------------
-DROP TABLE IF EXISTS `Task`;
-CREATE TABLE `task` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `forkid` varchar(64) DEFAULT NULL,
-  `block_hash` varchar(64) DEFAULT NULL,
-  `is_ok` bit(1) DEFAULT b'0',
-  PRIMARY KEY (`id`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT;
+) ENGINE=InnoDB AUTO_INCREMENT=34250 DEFAULT CHARSET=latin1 ROW_FORMAT=DYNAMIC;
 
 -- ----------------------------
 -- Table structure for Tx
 -- ----------------------------
 DROP TABLE IF EXISTS `Tx`;
-CREATE TABLE `tx` (
+CREATE TABLE `Tx` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `block_hash` varchar(64) DEFAULT NULL,
   `txid` varchar(64) DEFAULT NULL,
@@ -158,4 +102,4 @@ CREATE TABLE `tx` (
   KEY `txid` (`txid`) USING BTREE,
   KEY `spend_txid` (`spend_txid`) USING BTREE,
   KEY `to` (`to`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=2655075 DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT;
+) ENGINE=InnoDB AUTO_INCREMENT=1095279 DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT;

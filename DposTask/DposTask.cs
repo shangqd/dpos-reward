@@ -383,22 +383,22 @@ namespace DposTask
             var audit_date = ToDateTime(last_utc);
             using (var conn = new MySqlConnection(connStr))
             {
+                StringBuilder sql_sb = new StringBuilder();
                 foreach (var dpos_addr in m_vote_reward.Keys)
                 {
                     foreach (var client_addr in m_vote_reward[dpos_addr].Keys)
                     {
-                        string sql;
-                        if (conn.Query<DposState>("SELECT * FROM `DposState` where dpos_addr = @dpos_addr and client_addr = @client_addr and audit_date = @audit_date",
-                                new { dpos_addr = dpos_addr, client_addr = client_addr, audit_date = audit_date }).ToList().Count == 0)
+                        if (m_vote_reward[dpos_addr][client_addr].vote > 0)
                         {
-                            sql = "INSERT DposState(dpos_addr, client_addr, audit_date, audit_money)VALUES(@dpos_addr, @client_addr, @audit_date, @audit_money)";
+                            string sql = string.Format("INSERT DposState(dpos_addr, client_addr, audit_date, audit_money)VALUES('{0}', '{1}', '{2}', {3});",
+                                    dpos_addr, client_addr, audit_date, m_vote_reward[dpos_addr][client_addr].vote);
+                            sql_sb.Append(sql);
                         }
-                        else
-                        {
-                            sql = "Update DposState set audit_money=@audit_money where dpos_addr = @dpos_addr and client_addr = @client_addr and audit_date = @audit_date";
-                        }
-                        conn.Execute(sql, new { dpos_addr = dpos_addr, client_addr = client_addr, audit_date = audit_date, audit_money = m_vote_reward[dpos_addr][client_addr].vote });
                     }
+                }
+                if (sql_sb.Length > 0)
+                {
+                    conn.Execute(sql_sb.ToString(), new { });
                 }
             }
         }
@@ -412,17 +412,22 @@ namespace DposTask
             Console.WriteLine("-------------->>>>>>>> Save payment date:{0}",ToDateTime(last_utc).ToShortDateString());
             using (var conn = new MySqlConnection(connStr))
             {
+                StringBuilder sql_sb = new StringBuilder();
                 foreach (var dpos_addr in m_vote_reward.Keys)
                 {
                     foreach (var client_addr in m_vote_reward[dpos_addr].Keys)
                     {
-                        if (m_vote_reward[dpos_addr][client_addr].reward != 0)
+                        if (m_vote_reward[dpos_addr][client_addr].reward > 0)
                         {
-                            conn.Execute("INSERT DposPayment(dpos_addr, client_addr, payment_date, payment_money)VALUES(@dpos_addr, @client_addr, @payment_date, @payment_money)",
-                                new { dpos_addr = dpos_addr, client_addr = client_addr, payment_date = ToDateTime(last_utc), payment_money = m_vote_reward[dpos_addr][client_addr].reward });
+                            sql_sb.Append(string.Format("INSERT DposPayment(dpos_addr, client_addr, payment_date, payment_money)VALUES('{0}', '{1}', '{2}', {3});", 
+                                dpos_addr, client_addr, ToDateTime(last_utc), m_vote_reward[dpos_addr][client_addr].reward));
                             m_vote_reward[dpos_addr][client_addr].reward = 0;
                         }
                     }
+                }
+                if (sql_sb.Length > 0)
+                {
+                    conn.Execute(sql_sb.ToString(), new { });
                 }
             }
             UpdateDposState(last_utc);
